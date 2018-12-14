@@ -53,7 +53,7 @@ namespace WZdecay {
     void FillMomentumUsingAngles(CParticle* particle, double energy, double theta, double phi, double mass = 0) {
       double AbsMomentum = sqrt(energy*energy - mass*mass);
       particle->SetMomentum() = CLorentzVector(
-          AbsMomentum * sin(theta) * cos(phi), // x
+          AbsMomentum * sin(theta) * cos(phi), // x        
           AbsMomentum * sin(theta) * sin(phi), // y
           AbsMomentum * cos(theta), // z
           energy // energy
@@ -71,10 +71,10 @@ namespace WZdecay {
       double dTheta =0;
       if (partParent->Helicity() == 0) {
         while (1) {
-          double rdmForTheta = M_PI * m_random->Uniform();
+          double rdmForCosTheta = (2 * m_random->Uniform() - 1);
           double rdmIfKept = m_random->Uniform();
-          if (rdmIfKept < 2/M_PI * sin(rdmForTheta) * sin(rdmForTheta)) {
-            dTheta = rdmForTheta;
+          if (rdmIfKept < 3.0/4.0 * (1- rdmForCosTheta * rdmForCosTheta)) {
+            dTheta = acos(rdmForCosTheta);
             break;
           }
         }
@@ -82,10 +82,10 @@ namespace WZdecay {
       else {
         const int ciSign = (partParent->Flavor() * partParent->Helicity() > 0) ? 1: -1;
         while (1) {
-          double rdmForTheta = M_PI * m_random->Uniform();
-          double rdmIfKept = m_random->Uniform();
-          if (rdmIfKept < 2/(3*M_PI) * (1 + ciSign * cos(rdmForTheta)) * (1 + ciSign * cos(rdmForTheta)) ) {
-            dTheta = rdmForTheta;
+          double rdmForCosTheta = (2 * m_random->Uniform() - 1);
+          double rdmIfKept = 2*m_random->Uniform();
+          if (rdmIfKept < 3.0/8.0 * (1 + ciSign * rdmForCosTheta) * (1 + ciSign * rdmForCosTheta) ) {
+            dTheta = acos(rdmForCosTheta);
             break;
           }
         }

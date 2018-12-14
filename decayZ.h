@@ -63,23 +63,26 @@ namespace WZdecay {
       double dPhi = 2 * M_PI * (m_random->Uniform() - 0.5);
 
       // fill theta with angular distributions according to helicity
-      double dTheta;
+      double dTheta =0;
       if (partParent->Helicity() == 0) {
         while (1) {
-          double rdmForTheta = M_PI * m_random->Uniform();
+          double rdmForCosTheta = (2 * m_random->Uniform() - 1);
           double rdmIfKept = m_random->Uniform();
-          if (rdmIfKept < 2/M_PI * sin(rdmForTheta) * sin(rdmForTheta)) {
-            dTheta = rdmForTheta;
+          if (rdmIfKept < 3.0/4.0 * (1 - rdmForCosTheta * rdmForCosTheta)) {
+            dTheta = acos(rdmForCosTheta);
             break;
           }
         }
       }
       else {
+        if (abs(partParent->Helicity()) != 1) {
+          std::cout << "ERROR, wrong helicity given" << std::endl;
+        }
         while (1) {
-          double rdmForTheta = M_PI * m_random->Uniform();
-          double rdmIfKept = m_random->Uniform();
-          if (rdmIfKept < 0.21221 * (1 + cos(rdmForTheta) * cos(rdmForTheta) - partParent->Helicity() * 0.29816*cos(rdmForTheta)) ) {
-            dTheta = rdmForTheta;
+          double rdmForCosTheta = (2 * m_random->Uniform() - 1);
+          double rdmIfKept = 2*m_random->Uniform();
+          if (rdmIfKept < 3.0/8.0 * (1 + rdmForCosTheta * rdmForCosTheta - partParent->Helicity() * 0.29816*rdmForCosTheta) ) {
+            dTheta = acos(rdmForCosTheta);
             break;
           }
         }
@@ -140,9 +143,9 @@ namespace WZdecay {
         RandomMomentum(pBoson, product1, product2);
 
         // rotate products from Z boson rest frame (z equals Z direction in lab frame) to labframe
-        //CRotation rotZDirectionInLabframeToZAxis(CThreeVector(0,0,1), pBoson->Momentum().ThreeVector().Unit());
-        CThreeVector v3RotatedMomentumProd1 = product1->Momentum().ThreeVector();
-        CThreeVector v3RotatedMomentumProd2 = product2->Momentum().ThreeVector();
+        CRotation rotZDirectionInLabframeToZAxis(CThreeVector(0,0,1), pBoson->Momentum().ThreeVector().Unit());
+        CThreeVector v3RotatedMomentumProd1 = rotZDirectionInLabframeToZAxis.Rotate(product1->Momentum().ThreeVector());
+        CThreeVector v3RotatedMomentumProd2 = rotZDirectionInLabframeToZAxis.Rotate(product2->Momentum().ThreeVector());
         
         // boost products from W boson rest frame to labframe
         CThreeVector BoostZRestFrameToLabFrame = pBoson->Momentum().BoostVector();
