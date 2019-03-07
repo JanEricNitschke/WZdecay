@@ -56,9 +56,9 @@ namespace LHEF {
           }
       }
   
-      //if (vdLine0[vdLine0.size() - 1] != 1) {
-      //  throw std::runtime_error("NPRUP != 1 not implemented yet"); // cause I don't know what exactly this means (and it doesn't happen in my usecase)
-      //}
+      if (vdLine0[vdLine0.size() - 1] != 1) {
+        throw std::runtime_error("NPRUP != 1 not implemented yet"); // Different processes should each get their own lhef/hepmc file.
+      }
 
       std::string Line1; 
       getline(ssInitBlock, Line1);
