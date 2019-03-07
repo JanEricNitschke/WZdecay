@@ -5,6 +5,7 @@
 #include "hepmcreader269.h"
 #include "hepmcwriter.h"
 #include "lhefreader.h"
+#include "lhefwriter.h"
 #include "readerbase.h"
 #include "sorterhelicity.h"
 #include "decayW.h"
@@ -51,7 +52,7 @@ void EndProgramm() {
   log->toLog("Wrong number of arguments",4);
   std::cerr << "Usage: ./WZdecay [-l LOGLEVEL -c CROSSSECTION] INPUTFILE1 [INPUTFILE2 [...]]" << std::endl;
   std::cerr << "Where the INPUTFILES are either .lhe(f) or .hepmc files. Currently all have to be of the same type and connection of multiple files is only implemented for hepmc-files (Other files are ignored for lhef-files)." << std::endl;
-  //log->DumpToFile("WZdecay.log");
+  // log->DumpToFile("WZdecay.log");
   delete log;
   exit(EXIT_FAILURE);
 }
@@ -116,7 +117,6 @@ int main (int argc, char **argv)
     //  reader = new WZdecay::LHEFReader(vFilenames);
     //}
     //else {
-      std::cout << "imput cross section: "<< dXsection<< std::endl;
       reader = new WZdecay::LHEFReader(vFilenames, dXsection);
     //}
     
@@ -128,15 +128,11 @@ int main (int argc, char **argv)
   // contruction of objects for sorting and output
   std::vector<int> vecHelLongitudinal {0};
   std::vector<int> vecHelTransversal {-1,1};
-  WZdecay::CHepMCWriter outputWLZL("outputWLZL.hepmc");
-  WZdecay::CSorterHelicity sorterWLZL(vecHelLongitudinal, vecHelLongitudinal);
-  WZdecay::CHepMCWriter outputWLZT("outputWLZT.hepmc");
-  WZdecay::CSorterHelicity sorterWLZT(vecHelLongitudinal, vecHelTransversal);
-  WZdecay::CHepMCWriter outputWTZL("outputWTZL.hepmc");
-  WZdecay::CSorterHelicity sorterWTZL(vecHelTransversal, vecHelLongitudinal);
-  WZdecay::CHepMCWriter outputWTZT("outputWTZT.hepmc");
-  WZdecay::CSorterHelicity sorterWTZT(vecHelTransversal, vecHelTransversal);
-  std::vector<WZdecay::CHepMCWriter *> vecOutput {&outputWLZL, &outputWLZT, &outputWTZL, &outputWTZT};
+  //WZdecay::CHepMCWriter output("output.hepmc");//, reader);
+  WZdecay::CLHEFWriter output("output.lhef", reader);
+  //std::vector<WZdecay::CHepMCWriter *> vecOutput {&output};
+  std::vector<WZdecay::CLHEFWriter *> vecOutput {&output};
+
 
   // specify allowed decays
   WZdecay::CDecayW decWtoENu(1,1,0,0);
@@ -149,7 +145,7 @@ int main (int argc, char **argv)
 
   // loop over event
   WZdecay::CEvent* pEvent = 0;
-  const int iMaxNumberEvents = 20000000;
+  const int iMaxNumberEvents = 1E8;
   int iCounter = 0;
   while (iCounter < iMaxNumberEvents && reader->ReadEvent(pEvent)) {
     iCounter ++;
@@ -160,22 +156,7 @@ int main (int argc, char **argv)
         PrintProgressbar(iCounter, fmin(2000000., iMaxNumberEvents), 60);
     }
     log.toLog("Sort events.", 1);
-    if (sorterWLZL.IsAccepted(pEvent)) {
-      log.toLog("Found WLZL event.", 1);
-      outputWLZL.WriteEvent(pEvent);
-    }
-    if (sorterWLZT.IsAccepted(pEvent)) {
-      log.toLog("Found WLZT event.", 1);
-      outputWLZT.WriteEvent(pEvent);
-    }
-    if (sorterWTZL.IsAccepted(pEvent)) {
-      log.toLog("Found WTZL event.", 1);
-      outputWTZL.WriteEvent(pEvent);
-    }
-    if (sorterWTZT.IsAccepted(pEvent)) {
-      log.toLog("Found WTZT event.", 1);
-      outputWTZT.WriteEvent(pEvent);
-    }
+    output.WriteEvent(pEvent);
     delete pEvent;
   }
 
@@ -190,14 +171,11 @@ int main (int argc, char **argv)
   }
 
   log.toLog("Crosssection before allowed decays: " + std::to_string(reader->CrossSection()));
-  CalculateCrossSection(reader, vecOutput, &decWtoENu, &decZtoENu);
+  // CalculateCrossSection(reader, vecOutput, &decWtoENu, &decZtoENu);
   
   log.toLog("Crosssection after allowed decays: " + std::to_string(reader->CrossSection()));
   log.toLog("Sum of Input Weights: " + std::to_string(reader->SumOfWeights()));
-  log.toLog("WLZL: Sum of Weights: " + std::to_string(outputWLZL.SumOfWeights()) + " CrossSection: " + std::to_string(outputWLZL.CrossSection()) + "fb");
-  log.toLog("WLZT: Sum of Weights: " + std::to_string(outputWLZT.SumOfWeights()) + " CrossSection: " + std::to_string(outputWLZT.CrossSection()) + "fb");
-  log.toLog("WTZL: Sum of Weights: " + std::to_string(outputWTZL.SumOfWeights()) + " CrossSection: " + std::to_string(outputWTZL.CrossSection()) + "fb");
-  log.toLog("WTZT: Sum of Weights: " + std::to_string(outputWTZT.SumOfWeights()) + " CrossSection: " + std::to_string(outputWTZT.CrossSection()) + "fb");
+  // log.toLog("WLZL: Sum of Weights: " + std::to_string(output.SumOfWeights()) + " CrossSection: " + std::to_string(output.CrossSection()) + "fb");
   log.toLog("Done.");
   delete random;
 
