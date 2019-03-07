@@ -9,6 +9,8 @@
 #include "particle.h"
 #include "logger.h"
 
+#include <string>
+
 
 namespace WZdecay {
 
@@ -69,8 +71,8 @@ namespace WZdecay {
    */
   const CParticle* GetParticleByID(int iPDGID,const std::vector<CParticle> vecParticles){
     logger::CLogger log("SorterHelicity::GetParticleByID()");
-    for (const CParticle& particle : vecParticles ) {
-      if (particle.Flavor() == iPDGID) {
+    for (const CParticle& particle : vecParticles ) { 
+      if (particle.Flavor() == iPDGID && particle.Status() == 3) {
         return &particle;
       }
     }
