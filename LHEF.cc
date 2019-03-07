@@ -55,10 +55,10 @@ namespace LHEF {
             vdLine0.push_back(std::stod(sub));
           }
       }
-
-      if (vdLine0[vdLine0.size() - 1] != 1) {
-        throw std::runtime_error("NPRUP != 1 not implemented yet"); // cause I don't know what exactly this means (and it doesn't happen in my usecase)
-      }
+  
+      //if (vdLine0[vdLine0.size() - 1] != 1) {
+      //  throw std::runtime_error("NPRUP != 1 not implemented yet"); // cause I don't know what exactly this means (and it doesn't happen in my usecase)
+      //}
 
       std::string Line1; 
       getline(ssInitBlock, Line1);
@@ -242,6 +242,7 @@ namespace LHEF {
       m_strOutput << "\t"  << m_vdPy[i];
       m_strOutput << "\t"  << m_vdPz[i];
       m_strOutput << "\t"  << m_vdE[i];
+      m_strOutput << "\t"  << m_vdGeneratedMass[i];
       m_strOutput << "\t"  << m_vdLifetime[i];
       m_strOutput << "\t"  << m_vdHelicity[i];
       m_strOutput << std::endl;

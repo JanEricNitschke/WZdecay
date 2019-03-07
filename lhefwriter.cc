@@ -18,11 +18,11 @@ namespace WZdecay
     if (evInput->CntEvent() == 1) {
       log.toLog("Start evaluating InitBlock", 2);
       m_pioOutput->m_iIDBeam1 = 2212;
-      m_pioOutput->m_dEnergyBeam1 = 7000;
+      m_pioOutput->m_dEnergyBeam1 = 6500;
       m_pioOutput->m_iPDFSetBeam1 = 10800;
 
       m_pioOutput->m_iIDBeam2 = 2212;
-      m_pioOutput->m_dEnergyBeam2 = 7000;
+      m_pioOutput->m_dEnergyBeam2 = 6500;
       m_pioOutput->m_iPDFSetBeam2 = 10800; 
       
       m_pioOutput->m_iWeightingStrategy = 3;
@@ -51,19 +51,22 @@ namespace WZdecay
 
     for (int i = 0; i < evInput->VecParticles().size(); i++) {
       CParticle particle = evInput->VecParticles()[i];
-      m_pioOutput->m_viPDGID.push_back( particle.Flavor());
-      m_pioOutput->m_viStatus.push_back( particle.Status());
-      m_pioOutput->m_viIDMother1.push_back( particle.MotherID1());
-      m_pioOutput->m_viIDMother2.push_back( particle.MotherID2());
-      m_pioOutput->m_viIDColor1.push_back(particle.ColorID1());
-      m_pioOutput->m_viIDColor2.push_back(particle.ColorID2());
-      m_pioOutput->m_vdPx.push_back(particle.Momentum().X());
-      m_pioOutput->m_vdPy.push_back(particle.Momentum().Y());
-      m_pioOutput->m_vdPz.push_back(particle.Momentum().Z());
-      m_pioOutput->m_vdE.push_back(particle.Momentum().T());
+      m_pioOutput->m_viPDGID.push_back( particle.Flavor());         
+      m_pioOutput->m_viStatus.push_back( particle.Status());        
+      m_pioOutput->m_viIDMother1.push_back( particle.MotherID1());  
+      m_pioOutput->m_viIDMother2.push_back( particle.MotherID2());  
+      m_pioOutput->m_viIDColor1.push_back(particle.ColorID1());     
+      m_pioOutput->m_viIDColor2.push_back(particle.ColorID2());     
+      m_pioOutput->m_vdPx.push_back(particle.Momentum().X());       
+      m_pioOutput->m_vdPy.push_back(particle.Momentum().Y());       
+      m_pioOutput->m_vdPz.push_back(particle.Momentum().Z());       
+      m_pioOutput->m_vdE.push_back(particle.Momentum().T());        
+      if (particle.GeneratedMass()>0.1){
       m_pioOutput->m_vdGeneratedMass.push_back(particle.GeneratedMass());
-      m_pioOutput->m_vdLifetime.push_back(0);
-      m_pioOutput->m_vdHelicity.push_back(particle.Helicity());
+      }
+      else {m_pioOutput->m_vdGeneratedMass.push_back(0);}
+      m_pioOutput->m_vdLifetime.push_back(0);                        
+      m_pioOutput->m_vdHelicity.push_back(particle.Helicity());     
     }
 
     m_pioOutput->WriteEventBlock();

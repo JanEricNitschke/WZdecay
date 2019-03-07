@@ -79,15 +79,15 @@ namespace WZdecay
 
       // different status id conventions
       double status = m_pioInput->Status()[iter];
-      if (status == -1) {
-        particle->SetStatus(4);
-      }
-      else if (status == 4) {
-        particle->SetStatus(-1);
-      } 
-      else {
-        particle->SetStatus(status);
-      }
+      //if (status == -1) {
+      //  particle->SetStatus(-1);//4
+      //}
+      //else if (status == 4) {
+      //  particle->SetStatus(-1);
+      //} 
+      //else {
+      particle->SetStatus(status);
+	//}
 
       particle->SetHelicity() = m_pioInput->Helicity()[iter];
       particle->SetMomentum() = CLorentzVector(

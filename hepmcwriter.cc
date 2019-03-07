@@ -39,7 +39,11 @@ namespace WZdecay
     for (CEvent::particle_iterator iter = evInput->particles_begin(); iter != evInput->particles_end(); ++iter) {
       HepMC::GenParticle* phepParticle = WriteParticle(&(*iter));
       phepVertex->add_particle_out(phepParticle);
-      if (phepParticle->status() == 4) {
+      if (phepParticle->status() == 4 || phepParticle->status() == -1) {
+	if (!(phepParticle->pdg_id() == 2212 || phepParticle->pdg_id() == -2212 || phepParticle->pdg_id() ==  11 || phepParticle->pdg_id() == -11)){
+	phepParticle->set_status(-1);
+	}
+	else {phepParticle->set_status(4);}
         vpartIncoming.push_back(phepParticle);
       }
     }
