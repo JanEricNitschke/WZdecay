@@ -26,6 +26,18 @@ void CalculateCrossSection(WZdecay::ReaderBase* input, std::vector<WZdecay::CHep
   }
 }
 
+void CalculateCrossSectionlhef(WZdecay::ReaderBase* input, std::vector<WZdecay::CLHEFWriter*> vecOutput, WZdecay::CDecayW* decayW, WZdecay::CDecayZ* decayZ) {
+  logger::CLogger log("CalculateCrossSection()");
+  log.toLog("Input Crosssection: " + std::to_string(input->CrossSection()));
+  decayW->ReduceCrossSection(input);
+  decayZ->ReduceCrossSection(input);
+  double CrossSectionPerWeight = input->CrossSection()/input->SumOfWeights();
+  for (auto iter : vecOutput) {
+    iter->SetCrossSection(CrossSectionPerWeight*iter->SumOfWeights());
+    //iter->WriteCrossSection();
+  }
+}
+
 void PrintProgressbar(int current, int total, int iWidth) {
   logger::CLogger log("PrintProgressbar()");
   if (current % 100 == 0) {
