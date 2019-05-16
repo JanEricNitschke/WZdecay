@@ -11,7 +11,7 @@ all: WZdecay test
 WZdecay: main.cc lhefreader.cc hepmcreader269.cc hepmcwriter.cc lhefwriter.cc events.cc lorentzvector.cc threevector.cc LHEF.cc logger.cc
 	@g++ $(CXXFLAGS) $(LDFLAGS) $(LIBS) $(INCLUDES) $^ -o $@
 
-WZdecaylhef: mainalt.cc lhefreader.cc hepmcreader269.cc hepmcwriter.cc lhefwriter.cc events.cc lorentzvector.cc threevector.cc LHEF.cc logger.cc
+WZdecaylhef: mainlhef.cc lhefreader.cc hepmcreader269.cc hepmcwriter.cc lhefwriter.cc events.cc lorentzvector.cc threevector.cc LHEF.cc logger.cc
 	@g++ $(CXXFLAGS) $(LDFLAGS) $(LIBS) $(INCLUDES) $^ -o $@
 
 

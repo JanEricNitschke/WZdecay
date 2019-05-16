@@ -41,7 +41,7 @@ namespace WZdecay
      * @brief writes CEvent to HepMC container
      * @param event CEvent to be written
      */
-    virtual void WriteEvent(CEvent*& evInput);
+    virtual void WriteEvent(CEvent*& evInput, int Init=0);
 
     virtual void WriteCrossSection();
 

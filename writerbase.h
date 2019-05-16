@@ -22,7 +22,7 @@ namespace WZdecay
      * @brief writes CEvent to file
      * @param event CEvent to be written
      */
-    virtual void WriteEvent(CEvent*& event) = 0;
+    virtual void WriteEvent(CEvent*& event, int Init) = 0;
 
     const double SumOfWeights() const {
       return m_dSumOfWeights;

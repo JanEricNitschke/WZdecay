@@ -11,7 +11,7 @@
 namespace WZdecay
 {
 
-  void CHepMCWriter::WriteEvent(CEvent*& evInput)
+  void CHepMCWriter::WriteEvent(CEvent*& evInput, int Init)
   {
     HepMC::GenEvent* evhepmcOutput = new HepMC::GenEvent();
     evhepmcOutput->use_units(HepMC::Units::GEV, HepMC::Units::MM);
