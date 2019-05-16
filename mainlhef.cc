@@ -62,7 +62,7 @@ void PrintProgressbar(int current, int total, int iWidth) {
 void EndProgramm() {
   logger::CLogger* log = new logger::CLogger("EndProgramm()");
   log->toLog("Wrong number of arguments",4);
-  std::cerr << "Usage: ./WZdecay [-l LOGLEVEL -c CROSSSECTION] INPUTFILE1 [INPUTFILE2 [...]]" << std::endl;
+  std::cerr << "Usage: ./WZdecay [-l LOGLEVEL -c CROSSSECTION -s RNGSEED] INPUTFILE1 [INPUTFILE2 [...]]" << std::endl;
   std::cerr << "Where the INPUTFILES are either .lhe(f) or .hepmc files. Currently all have to be of the same type and connection of multiple files is only implemented for hepmc-files (Other files are ignored for lhef-files)." << std::endl;
   // log->DumpToFile("WZdecay.log");
   delete log;
@@ -76,13 +76,14 @@ int main (int argc, char **argv)
 
   // parse command line arguments
   double dXsection = 0;
+  double seed = 0;
   if (argc == 1) {
     EndProgramm();
   }
 
   int indCrosssection = 1;
   int indFirstFile = 1;
-
+  int indSeed = 1;
   // check if log level is provided
   if (static_cast<std::string>(argv[1]) == "-l") {
     if (argc < 3) {
@@ -100,7 +101,10 @@ int main (int argc, char **argv)
 
     indFirstFile    += 2;
     indCrosssection += 2;
+    indSeed         += 2;
   }
+
+  
 
   // check if crosssection is provided
   if (static_cast<std::string>(argv[indCrosssection]) == "-c") {
@@ -109,8 +113,21 @@ int main (int argc, char **argv)
     }
     std::string xsect = argv[indCrosssection + 1];
     dXsection = std::stod(xsect);
-    indFirstFile = indCrosssection + 2;
+    indFirstFile += 2; //indCrosssection + 2;
+    indSeed      += 2; 
   }
+
+  //check if rng seed is provided
+  if (static_cast<std::string>(argv[indSeed]) == "-s") {
+    if (argc < indSeed + 2) {
+      EndProgramm();
+    }
+    std::string rng = argv[indSeed + 1];
+    seed = std::stod(rng);
+    indFirstFile += 2; //indCrosssection + 2;                                                                                                                                                                     
+    }
+
+
 
   // fill vector of filenames
   std::vector<const char*> vFilenames;
@@ -168,7 +185,7 @@ int main (int argc, char **argv)
   WZdecay::CDecayZ decZtoENu(1,1,0,0);
 
 
-  WZdecay::CRandom* random = new WZdecay::CRandom(0);
+  WZdecay::CRandom* random = new WZdecay::CRandom(seed);
 
 
 
