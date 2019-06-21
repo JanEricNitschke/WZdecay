@@ -11,7 +11,6 @@ namespace WZdecay {
     
   public:
     virtual double Uniform() = 0;
-
   }; // end of class aCRandomBase
 
 }; // end of namespace WZdecay

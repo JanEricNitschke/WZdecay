@@ -13,15 +13,19 @@ namespace WZdecay {
   class CRandom : public aCRandomBase 
   {
   private:
-    double m_dSeed;
+    unsigned m_dSeed;
     std::mt19937_64 random_engine;
     std::uniform_real_distribution<double> rng;
 
   public:
-    CRandom(double seed=0) :
+    CRandom(double seed) :
       m_dSeed(seed)
       {}
-
+      
+      virtual void setSeed(){
+	 random_engine.seed(m_dSeed);
+      }
+     
     virtual double Uniform() {
       return rng(random_engine);
     } 

@@ -183,10 +183,8 @@ int main (int argc, char **argv)
   // specify allowed decays
   WZdecay::CDecayW decWtoENu(1,1,0,0);
   WZdecay::CDecayZ decZtoENu(1,1,0,0);
-
-
   WZdecay::CRandom* random = new WZdecay::CRandom(seed);
-
+  random->setSeed();
 
 
   // loop over event
