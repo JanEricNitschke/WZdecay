@@ -81,7 +81,7 @@ namespace WZdecay
       m_pioOutput->m_vdPy.push_back(particle.Momentum().Y());       
       m_pioOutput->m_vdPz.push_back(particle.Momentum().Z());       
       m_pioOutput->m_vdE.push_back(particle.Momentum().T());        
-      if (particle.GeneratedMass()>0.1){
+      if (particle.Flavor()==24 or particle.Flavor()==-24 or particle.Flavor()==25 or particle.Flavor()==23){
       m_pioOutput->m_vdGeneratedMass.push_back(particle.GeneratedMass());
       }
       else {m_pioOutput->m_vdGeneratedMass.push_back(0);}
