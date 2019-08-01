@@ -15,7 +15,7 @@ namespace WZdecay {
   // private:
     
   public:
-    virtual void DecayAllPDGID(CEvent* event, CRandom* random) = 0;
+    virtual void DecayAllPDGID(CEvent* event, CRandom* random, int frame) = 0;
 
   }; // end of class aCDecayBase
 

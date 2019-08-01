@@ -28,6 +28,7 @@ namespace WZdecay {
     bool m_isTauTauAllowed;
     bool m_isRestAllowed;
     std::vector<CParticle*> m_vecZBosons;
+    std::vector<CParticle*> m_vecpartons;
     double m_dBREE;
     double m_dBRMuMu;
     double m_dBRTauTau;
@@ -44,6 +45,18 @@ namespace WZdecay {
         }
       }
     }
+
+    void FindQuarks(CEvent* event) {
+      m_vecpartons = {};
+      // for (CParticle particle : event->VecParticles() ) {
+      for (int i = 0; i < event->VecParticles().size(); i++ ) {
+        CParticle particle = event->SetParticle(i);
+        if (std::abs(particle.Flavor()) < 9 && particle.Status() == -1) {
+          m_vecpartons.push_back(&(event->SetParticle(i)));
+        }
+      }
+    }
+
 
     void FillMomentumUsingAngles(CParticle* particle, double energy, double theta, double phi, double mass = 0) {
       double AbsMomentum = sqrt(energy*energy - mass*mass);
@@ -111,9 +124,10 @@ namespace WZdecay {
           m_isRestAllowed * m_dBRRest;
       }
 
-    virtual void DecayAllPDGID(CEvent* event, CRandom* random) {
+      virtual void DecayAllPDGID(CEvent* event, CRandom* random, int frame) {
       m_random = random;
       FindBosons(event);
+      FindQuarks(event);
       logger::CLogger log("DecayZ::DecayAllPDGID()");
 
       for (CParticle* pBoson : m_vecZBosons) {
@@ -142,25 +156,62 @@ namespace WZdecay {
 
         RandomMomentum(pBoson, product1, product2);
 
+
+	if (frame==0){
         // rotate products from Z boson rest frame (z equals Z direction in lab frame) to labframe
         CRotation rotZDirectionInLabframeToZAxis(CThreeVector(0,0,1), pBoson->Momentum().ThreeVector().Unit());
         CThreeVector v3RotatedMomentumProd1 = rotZDirectionInLabframeToZAxis.Rotate(product1->Momentum().ThreeVector());
         CThreeVector v3RotatedMomentumProd2 = rotZDirectionInLabframeToZAxis.Rotate(product2->Momentum().ThreeVector());
         
-        // boost products from W boson rest frame to labframe
+        // boost products from Z boson rest frame to labframe
         CThreeVector BoostZRestFrameToLabFrame = pBoson->Momentum().BoostVector();
 
-        // set boson as mother particle
+	product1->SetMomentum() = CLorentzVector(v3RotatedMomentumProd1, product1->Momentum().T()).Boost(BoostZRestFrameToLabFrame);
+        product2->SetMomentum() = CLorentzVector(v3RotatedMomentumProd2, product2->Momentum().T()).Boost(BoostZRestFrameToLabFrame);
+	}
+
+	else if (frame==1){
+	  CLorentzVector momentum;
+	  for (CParticle* quark : m_vecpartons) {
+	    momentum+=quark->Momentum();
+	  }	
+	// rotate products from W boson rest frame (z equals W direction in lab frame) to labframe
+	  CThreeVector boostVector;
+	  boostVector-=(momentum).BoostVector();
+	  CThreeVector BoostZRestFrameToLabFrame = pBoson->Momentum().BoostVector();
+	  CLorentzVector BosonMom=pBoson->Momentum();
+	  BosonMom.Boost(boostVector);
+	  // pBoson->SetMomentum() = BosonMom;
+	    
+	  CRotation rotZDirectionInLabframeToZAxis(CThreeVector(0,0,1), BosonMom.ThreeVector().Unit());
+	  
+	  CThreeVector v3RotatedMomentumProd1 = rotZDirectionInLabframeToZAxis.Rotate(product1->Momentum().ThreeVector());
+	  CThreeVector v3RotatedMomentumProd2 = rotZDirectionInLabframeToZAxis.Rotate(product2->Momentum().ThreeVector());
+	  
+	  // boost products from W boson rest frame to labframe
+	  
+	  
+	  product1->SetMomentum() = CLorentzVector(v3RotatedMomentumProd1, product1->Momentum().T()).Boost(BoostZRestFrameToLabFrame);
+	  product2->SetMomentum() = CLorentzVector(v3RotatedMomentumProd2, product2->Momentum().T()).Boost(BoostZRestFrameToLabFrame);
+	  
+	}
+
+	else {
+	  std::cerr << "Frame not supported" << std::endl;
+	  exit(EXIT_FAILURE);
+	}
+
+
+
+
+	// set boson as mother particle
         product1->SetMotherID1(pBoson->ID());
         product1->SetMotherID2(pBoson->ID());
         product2->SetMotherID1(pBoson->ID());
         product2->SetMotherID2(pBoson->ID());
 
-        log.toLog("momentum in rest frame first product: x="+std::to_string(v3RotatedMomentumProd1.X()), 1);
-        product1->SetMomentum() = CLorentzVector(v3RotatedMomentumProd1, product1->Momentum().T()).Boost(BoostZRestFrameToLabFrame);
-        product2->SetMomentum() = CLorentzVector(v3RotatedMomentumProd2, product2->Momentum().T()).Boost(BoostZRestFrameToLabFrame);
-
-        log.toLog("Momentum first product: Px="+std::to_string(product1->Momentum().X()), 1);
+        /* log.toLog("momentum in rest frame first product: x="+std::to_string(v3RotatedMomentumProd1.X()), 1); */
+	log.toLog("Momentum first product: Px="+std::to_string(product1->Momentum().X()), 1);
         event->AddParticle(*product1);
         event->AddParticle(*product2);
       }

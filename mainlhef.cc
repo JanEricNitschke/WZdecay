@@ -62,7 +62,8 @@ void PrintProgressbar(int current, int total, int iWidth) {
 void EndProgramm() {
   logger::CLogger* log = new logger::CLogger("EndProgramm()");
   log->toLog("Wrong number of arguments",4);
-  std::cerr << "Usage: ./WZdecay [-l LOGLEVEL -c CROSSSECTION -s RNGSEED] INPUTFILE1 [INPUTFILE2 [...]]" << std::endl;
+  std::cerr << "Usage: ./WZdecay [-l LOGLEVEL -c CROSSSECTION -s RNGSEED -f Frame] INPUTFILE1 [INPUTFILE2 [...]]" << std::endl;
+  std::cerr << "Frame 0 = Labframe, 1 Parton com Planned:(, 2 WZ com)" << std::endl;
   std::cerr << "Where the INPUTFILES are either .lhe(f) or .hepmc files. Currently all have to be of the same type and connection of multiple files is only implemented for hepmc-files (Other files are ignored for lhef-files)." << std::endl;
   // log->DumpToFile("WZdecay.log");
   delete log;
@@ -77,6 +78,7 @@ int main (int argc, char **argv)
   // parse command line arguments
   double dXsection = 0;
   double seed = 0;
+  int frame = 1;
   if (argc == 1) {
     EndProgramm();
   }
@@ -84,6 +86,7 @@ int main (int argc, char **argv)
   int indCrosssection = 1;
   int indFirstFile = 1;
   int indSeed = 1;
+  int indFrame = 1;
   // check if log level is provided
   if (static_cast<std::string>(argv[1]) == "-l") {
     if (argc < 3) {
@@ -102,6 +105,7 @@ int main (int argc, char **argv)
     indFirstFile    += 2;
     indCrosssection += 2;
     indSeed         += 2;
+    indFrame        += 2; 
   }
 
   
@@ -114,7 +118,8 @@ int main (int argc, char **argv)
     std::string xsect = argv[indCrosssection + 1];
     dXsection = std::stod(xsect);
     indFirstFile += 2; //indCrosssection + 2;
-    indSeed      += 2; 
+    indSeed      += 2;
+    indFrame     += 2;
   }
 
   //check if rng seed is provided
@@ -124,9 +129,19 @@ int main (int argc, char **argv)
     }
     std::string rng = argv[indSeed + 1];
     seed = std::stod(rng);
-    indFirstFile += 2; //indCrosssection + 2;                                                                                                                                                                     
+    indFirstFile += 2; //indCrosssection + 2;
+    indFrame     += 2;
     }
 
+  //check if frame is provided
+  if (static_cast<std::string>(argv[indFrame]) == "-f") {
+    if (argc < indFrame + 2) {
+      EndProgramm();
+    }
+    std::string Sframe = argv[indFrame + 1];
+    frame = std::stoi(Sframe);
+    indFirstFile += 2; //indCrosssection + 2;
+      }
 
 
   // fill vector of filenames
@@ -198,8 +213,8 @@ int main (int argc, char **argv)
   while (iCounter < iMaxNumberEvents && reader->ReadEvent(pEvent)) {
     iCounter ++;
     log.toLog("In new event.", 1);
-    decWtoENu.DecayAllPDGID(pEvent, random);
-    decZtoENu.DecayAllPDGID(pEvent, random);
+    decWtoENu.DecayAllPDGID(pEvent, random, frame);
+    decZtoENu.DecayAllPDGID(pEvent, random, frame);
     if (iCounter % 100 == 0) {
         PrintProgressbar(iCounter, fmin(2000000., iMaxNumberEvents), 60);
     }
