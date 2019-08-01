@@ -68,10 +68,10 @@ namespace WZdecay {
         while (1) {
           double rdmForCosTheta = (2 * m_random->Uniform() - 1);
           double rdmIfKept = m_random->Uniform();
-          //if (rdmIfKept < 3.0/4.0 * (1 - rdmForCosTheta * rdmForCosTheta)) {
-	  dTheta = 1;//acos(rdmForCosTheta);
-          break;
-          //}
+          if (rdmIfKept < 3.0/4.0 * (1 - rdmForCosTheta * rdmForCosTheta)) {
+            dTheta = M_PI/2;//acos(rdmForCosTheta);
+            break;
+          }
         }
       }
       else {
@@ -81,10 +81,10 @@ namespace WZdecay {
         while (1) {
           double rdmForCosTheta = (2 * m_random->Uniform() - 1);
           double rdmIfKept = 2*m_random->Uniform();
-          //if (rdmIfKept < 3.0/8.0 * (1 + rdmForCosTheta * rdmForCosTheta - partParent->Helicity() * 0.29816*rdmForCosTheta) ) {
-          dTheta = 1;//acos(rdmForCosTheta);
-          break;
-          //}
+          if (rdmIfKept < 3.0/8.0 * (1 + rdmForCosTheta * rdmForCosTheta - partParent->Helicity() * 0.29816*rdmForCosTheta) ) {
+            dTheta = M_PI/2;//acos(rdmForCosTheta);
+            break;
+          }
         }
       }
 

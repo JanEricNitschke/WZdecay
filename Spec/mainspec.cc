@@ -26,6 +26,18 @@ void CalculateCrossSection(WZdecay::ReaderBase* input, std::vector<WZdecay::CHep
   }
 }
 
+void CalculateCrossSectionlhef(WZdecay::ReaderBase* input, std::vector<WZdecay::CLHEFWriter*> vecOutput, WZdecay::CDecayW* decayW, WZdecay::CDecayZ* decayZ) {
+  logger::CLogger log("CalculateCrossSection()");
+  log.toLog("Input Crosssection: " + std::to_string(input->CrossSection()));
+  decayW->ReduceCrossSection(input);
+  decayZ->ReduceCrossSection(input);
+  double CrossSectionPerWeight = input->CrossSection()/input->SumOfWeights();
+  for (auto iter : vecOutput) {
+    iter->SetCrossSection(CrossSectionPerWeight*iter->SumOfWeights());
+    //iter->WriteCrossSection();
+  }
+}
+
 void PrintProgressbar(int current, int total, int iWidth) {
   logger::CLogger log("PrintProgressbar()");
   if (current % 100 == 0) {
@@ -50,7 +62,7 @@ void PrintProgressbar(int current, int total, int iWidth) {
 void EndProgramm() {
   logger::CLogger* log = new logger::CLogger("EndProgramm()");
   log->toLog("Wrong number of arguments",4);
-  std::cerr << "Usage: ./WZdecay [-l LOGLEVEL -c CROSSSECTION] INPUTFILE1 [INPUTFILE2 [...]]" << std::endl;
+  std::cerr << "Usage: ./WZdecay [-l LOGLEVEL -c CROSSSECTION -s RNGSEED] INPUTFILE1 [INPUTFILE2 [...]]" << std::endl;
   std::cerr << "Where the INPUTFILES are either .lhe(f) or .hepmc files. Currently all have to be of the same type and connection of multiple files is only implemented for hepmc-files (Other files are ignored for lhef-files)." << std::endl;
   // log->DumpToFile("WZdecay.log");
   delete log;
@@ -64,13 +76,14 @@ int main (int argc, char **argv)
 
   // parse command line arguments
   double dXsection = 0;
+  double seed = 0;
   if (argc == 1) {
     EndProgramm();
   }
 
   int indCrosssection = 1;
   int indFirstFile = 1;
-
+  int indSeed = 1;
   // check if log level is provided
   if (static_cast<std::string>(argv[1]) == "-l") {
     if (argc < 3) {
@@ -88,7 +101,10 @@ int main (int argc, char **argv)
 
     indFirstFile    += 2;
     indCrosssection += 2;
+    indSeed         += 2;
   }
+
+  
 
   // check if crosssection is provided
   if (static_cast<std::string>(argv[indCrosssection]) == "-c") {
@@ -97,8 +113,21 @@ int main (int argc, char **argv)
     }
     std::string xsect = argv[indCrosssection + 1];
     dXsection = std::stod(xsect);
-    indFirstFile = indCrosssection + 2;
+    indFirstFile += 2; //indCrosssection + 2;
+    indSeed      += 2; 
   }
+
+  //check if rng seed is provided
+  if (static_cast<std::string>(argv[indSeed]) == "-s") {
+    if (argc < indSeed + 2) {
+      EndProgramm();
+    }
+    std::string rng = argv[indSeed + 1];
+    seed = std::stod(rng);
+    indFirstFile += 2; //indCrosssection + 2;                                                                                                                                                                     
+    }
+
+
 
   // fill vector of filenames
   std::vector<const char*> vFilenames;
@@ -128,25 +157,28 @@ int main (int argc, char **argv)
   // contruction of objects for sorting and output
   std::vector<int> vecHelLongitudinal {0};
   std::vector<int> vecHelTransversal {-1,1};
-  //WZdecay::CHepMCWriter output("output.hepmc");//, reader);
+
   WZdecay::CLHEFWriter output("output.lhef", reader);
-  //std::vector<WZdecay::CHepMCWriter *> vecOutput {&output};
   std::vector<WZdecay::CLHEFWriter *> vecOutput {&output};
 
 
+
+
   // specify allowed decays
-  WZdecay::CDecayW decWtoENu(1,1,1,0);
-  WZdecay::CDecayZ decZtoENu(1,1,1,0);
-
-
-  WZdecay::CRandom* random = new WZdecay::CRandom(0);
-
+  WZdecay::CDecayW decWtoENu(1,1,0,0);
+  WZdecay::CDecayZ decZtoENu(1,1,0,0);
+  WZdecay::CRandom* random = new WZdecay::CRandom(seed);
+  random->setSeed();
 
 
   // loop over event
   WZdecay::CEvent* pEvent = 0;
   const int iMaxNumberEvents = 1E8;
   int iCounter = 0;
+  int LL = 1;
+  int LT = 1;
+  int TL = 1;
+  int TT = 1;
   while (iCounter < iMaxNumberEvents && reader->ReadEvent(pEvent)) {
     iCounter ++;
     log.toLog("In new event.", 1);
@@ -155,8 +187,11 @@ int main (int argc, char **argv)
     if (iCounter % 100 == 0) {
         PrintProgressbar(iCounter, fmin(2000000., iMaxNumberEvents), 60);
     }
+    //log.toLog("Sort events.", 1);
+    //output.WriteEvent(pEvent);
     log.toLog("Sort events.", 1);
-    output.WriteEvent(pEvent, 0);
+    output.WriteEvent(pEvent, LL);
+    LL = 0;
     delete pEvent;
   }
 
@@ -170,12 +205,20 @@ int main (int argc, char **argv)
     log.toLog("No next Event.", 2);
   }
 
-  log.toLog("Crosssection before allowed decays: " + std::to_string(reader->CrossSection()));
+  //log.toLog("Crosssection before allowed decays: " + std::to_string(reader->CrossSection()));
   // CalculateCrossSection(reader, vecOutput, &decWtoENu, &decZtoENu);
+  
+  //log.toLog("Crosssection after allowed decays: " + std::to_string(reader->CrossSection()));
+  //log.toLog("Sum of Input Weights: " + std::to_string(reader->SumOfWeights()));
+  // log.toLog("WLZL: Sum of Weights: " + std::to_string(output.SumOfWeights()) + " CrossSection: " + std::to_string(output.CrossSection()) + "fb");
+  
+  log.toLog("Crosssection before allowed decays: " + std::to_string(reader->CrossSection()));
+  CalculateCrossSectionlhef(reader, vecOutput, &decWtoENu, &decZtoENu);
   
   log.toLog("Crosssection after allowed decays: " + std::to_string(reader->CrossSection()));
   log.toLog("Sum of Input Weights: " + std::to_string(reader->SumOfWeights()));
-  // log.toLog("WLZL: Sum of Weights: " + std::to_string(output.SumOfWeights()) + " CrossSection: " + std::to_string(output.CrossSection()) + "fb");
+  log.toLog("WZ: Sum of Weights: " + std::to_string(output.SumOfWeights()) + " CrossSection: " + std::to_string(output.CrossSection()) + "fb");
+  
   log.toLog("Done.");
   delete random;
 

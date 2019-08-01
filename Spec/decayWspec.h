@@ -14,16 +14,6 @@
 #include "readerbase.h"
 
 #include <math.h>
-#include <string>
-#include "logger.h"
-#include <vector>
-#include <cassert>
-#include "events.h"
-#include "sorterbase.h"
-#include "particle.h"
-#include "logger.h"
-
-#include <string>
 
 namespace WZdecay {
 
@@ -51,9 +41,7 @@ namespace WZdecay {
       // for (CParticle particle : event->VecParticles() ) {
       for (int i = 0; i < event->VecParticles().size(); i++ ) {
         CParticle particle = event->SetParticle(i);
-	
-	//if (particle.Flavor() == 24 || particle.Flavor() == -24) {
-	if (particle.Flavor() == 24 && particle.Status() == 1) {
+        if (particle.Flavor() == 24 && particle.Status() == 1) {
           m_vecWBosons.push_back(&(event->SetParticle(i)));
         }
         if (particle.Flavor() == -24 && particle.Status() == 1) {
@@ -85,10 +73,10 @@ namespace WZdecay {
         while (1) {
           double rdmForCosTheta = (2 * m_random->Uniform() - 1);
           double rdmIfKept = m_random->Uniform();
-          //if (rdmIfKept < 3.0/4.0 * (1- rdmForCosTheta * rdmForCosTheta)) {
-	  dTheta = 1;//acos(rdmForCosTheta);
-          break;
-          //}
+          if (rdmIfKept < 3.0/4.0 * (1- rdmForCosTheta * rdmForCosTheta)) {
+            dTheta = M_PI/2;//acos(rdmForCosTheta);
+            break;
+          }
         }
       }
       else {
@@ -96,10 +84,10 @@ namespace WZdecay {
         while (1) {
           double rdmForCosTheta = (2 * m_random->Uniform() - 1);
           double rdmIfKept = 2*m_random->Uniform();
-          //if (rdmIfKept < 3.0/8.0 * (1 + ciSign * rdmForCosTheta) * (1 + ciSign * rdmForCosTheta) ) {
-	  dTheta = 1;//acos(rdmForCosTheta);
-          break;
-	  // }
+          if (rdmIfKept < 3.0/8.0 * (1 + ciSign * rdmForCosTheta) * (1 + ciSign * rdmForCosTheta) ) {
+            dTheta = M_PI/2;//acos(rdmForCosTheta);
+            break;
+          }
         }
       }
 

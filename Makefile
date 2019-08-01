@@ -14,6 +14,10 @@ WZdecay: main.cc lhefreader.cc hepmcreader269.cc hepmcwriter.cc lhefwriter.cc ev
 WZdecaylhef: mainlhef.cc lhefreader.cc hepmcreader269.cc hepmcwriter.cc lhefwriter.cc events.cc lorentzvector.cc threevector.cc LHEF.cc logger.cc
 	@g++ $(CXXFLAGS) $(LDFLAGS) $(LIBS) $(INCLUDES) $^ -o $@
 
+WZdecayspeclhef: mainspec.cc lhefreader.cc hepmcreader269.cc hepmcwriter.cc lhefwriter.cc events.cc lorentzvector.cc threevector.cc LHEF.cc logger.cc
+	@g++ $(CXXFLAGS) $(LDFLAGS) $(LIBS) $(INCLUDES) $^ -o $@
+
+
 
 #WZdecaytest: maintest.cc lhefreader.cc hepmcreader269.cc hepmcwriter.cc events.cc lorentzvector.cc threevector.cc LHEF.cc
 #	@g++ $(CXXFLAGS) $(LDFLAGS) $(LIBS) $(INCLUDES) $^ -o $@
