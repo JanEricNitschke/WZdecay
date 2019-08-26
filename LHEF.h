@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <cmath>
 
 namespace LHEF {
 
@@ -23,7 +24,14 @@ namespace LHEF {
     xmlNode* m_lheFile;
     xmlNode* m_lheHeader;
     xmlNode* m_lheCurrentEvent;
+    xmlNode* m_lheCurrentEventMgwt; //@patmasid 
   public:
+    /*xmlNode* m_lheInit;
+    xmlNode* m_lheFile;
+    xmlNode* m_lheHeader;
+    xmlNode* m_lheCurrentEvent;
+    xmlNode* m_lheCurrentEventMgwt;*/ //@patmasid
+    
     int m_iIDBeam1;
     int m_iIDBeam2;
     double m_dEnergyBeam1;
@@ -144,6 +152,15 @@ namespace LHEF {
       return m_vdGeneratedMass;
     }
 
+    xmlNode* GetEvtMgwt() //@patmasid
+    {
+      return m_lheCurrentEventMgwt;
+    }
+
+    xmlNode* GetLhefHeader() //@patmasid
+    {
+      return m_lheHeader;
+    }
 
     void init();
 
@@ -152,6 +169,8 @@ namespace LHEF {
     void ParseInitBlock(std::string InitBlock);
 
     void ParseEventBlock(std::string EventBlock);
+
+    void print_xmlNodes_r(xmlNode * a_node); //@patmasid
 
   }; // end of class LHEFParser
 
@@ -198,24 +217,26 @@ namespace LHEF {
     std::vector<double>m_vdLifetime;
     std::vector<double>m_vdHelicity;
 
-    LHEFWriter(const char* filename, const char* generator = 0)
+    LHEFWriter(const char* filename, xmlNode* header, const char* generator = 0) //@patmasid
       {
         m_strOutput.open(filename);
-        WriteHeader(generator);
+        WriteHeader(header, generator);
         SetDefaultInit();
         SetDefaultEvent();
       }
-
+    
     ~LHEFWriter() {
       m_strOutput << "</LesHouchesEvents>" << std::endl;
       m_strOutput.close();
     }
 
-    void WriteHeader(const char* generator = 0);
+    void init();
+    void print_xmlNodes_w(xmlNode * a_node); //@patmasid
+    void WriteHeader(xmlNode* header, const char* generator = 0); //@patmasid
     void SetDefaultInit();
     void SetDefaultEvent();
-    void WriteInitBlock();
-    void WriteEventBlock();
+    void WriteInitBlock(); 
+    void WriteEventBlock(xmlNode* EventMgwt); //@patmasid
 
   }; // end of class LHEFWriter
 } // end of namespace LHEF

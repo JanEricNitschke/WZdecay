@@ -9,6 +9,9 @@
 #include "particle.h"
 #include "vertex.h"
 #include "logger.h"
+#include <libxml/parser.h>
+#include <libxml/tree.h>
+
 
 namespace WZdecay
 {
@@ -71,6 +74,11 @@ namespace WZdecay
 
     // CMatrixElement* pm_MatrixElement;
 
+    /**
+      Event Weights
+     */
+
+    xmlNode* m_EvtMgwt; //@patmasid
 
   public:
     // constructors and destructors
@@ -291,6 +299,16 @@ namespace WZdecay
     const CParticle& operator [] (int iIndex) const 
     {
       return m_vecParticles[static_cast<int>(iIndex + 1)];
+    }
+
+    xmlNode* ReturnMgwt()
+    {
+      return m_EvtMgwt;
+    }
+
+    void SetMgwt(xmlNode* EvtMgwt)
+    {
+      m_EvtMgwt = EvtMgwt;
     }
 
   }; // end of class CEvent

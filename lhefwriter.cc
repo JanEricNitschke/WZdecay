@@ -8,22 +8,23 @@
 #include "LHEF.h"
 #include "lhefwriter.h"
 #include "logger.h"
+#include <cmath>
 
 namespace WZdecay
 {
 
-  void CLHEFWriter::WriteEvent(CEvent*& evInput, int Init)
+  void CLHEFWriter::WriteEvent(CEvent*& evInput)
   {
     logger::CLogger log("CLHEFWriter::WriteEvent");
     if (evInput->CntEvent() == 1) {
       log.toLog("Start evaluating InitBlock", 2);
       m_pioOutput->m_iIDBeam1 = 2212;
       m_pioOutput->m_dEnergyBeam1 = 6500;
-      m_pioOutput->m_iPDFSetBeam1 = 10800;
+      m_pioOutput->m_iPDFSetBeam1 = 260000;
 
       m_pioOutput->m_iIDBeam2 = 2212;
       m_pioOutput->m_dEnergyBeam2 = 6500;
-      m_pioOutput->m_iPDFSetBeam2 = 10800; 
+      m_pioOutput->m_iPDFSetBeam2 = 260000; 
       
       m_pioOutput->m_iWeightingStrategy = 3;
       m_pioOutput->m_iNProcesses = 1;
@@ -41,26 +42,6 @@ namespace WZdecay
       log.toLog("Done setting all information for init block", 2);
       m_pioOutput->WriteInitBlock();
     }
-    else if (Init==1) {
-      m_pioOutput->m_iIDBeam1 = 2212;
-      m_pioOutput->m_dEnergyBeam1 = 6500;
-      m_pioOutput->m_iPDFSetBeam1 = 10800;
-
-      m_pioOutput->m_iIDBeam2 = 2212;
-      m_pioOutput->m_dEnergyBeam2 = 6500;
-      m_pioOutput->m_iPDFSetBeam2 = 10800; 
-      
-      m_pioOutput->m_iWeightingStrategy = 3;
-      m_pioOutput->m_iNProcesses = 1;
-      if (m_pioInput == 0) {
-        log.toLog("Reader is null pointer", 4);
-      }
-      m_pioOutput->m_vdCrosssection = std::vector<double>({m_pioInput->CrossSection()});
-      m_pioOutput->m_vdCrosssectionError = std::vector<double>({m_pioInput->CrossSectionError()});
-      m_pioOutput->m_vdCrosssectionMax = std::vector<double>({m_pioInput->CrossSectionMax()});
-      m_pioOutput->m_viProcessID = std::vector<int>({1});
-      m_pioOutput->WriteInitBlock();
-    }
 
     m_pioOutput->m_iIDProcess = 0;
     m_pioOutput->m_dWeight = evInput->Weight();
@@ -68,28 +49,25 @@ namespace WZdecay
     m_pioOutput->m_dQEDCoupling = evInput->AlphaWeak();
     m_pioOutput->m_dQCDCoupling = evInput->AlphaStrong();
     m_pioOutput->m_iNParticles = evInput->VecParticles().size();
-    this->AddToSumOfWeights(evInput->Weight());
+
     for (int i = 0; i < evInput->VecParticles().size(); i++) {
       CParticle particle = evInput->VecParticles()[i];
-      m_pioOutput->m_viPDGID.push_back( particle.Flavor());         
-      m_pioOutput->m_viStatus.push_back( particle.Status());        
-      m_pioOutput->m_viIDMother1.push_back( particle.MotherID1());  
-      m_pioOutput->m_viIDMother2.push_back( particle.MotherID2());  
-      m_pioOutput->m_viIDColor1.push_back(particle.ColorID1());     
-      m_pioOutput->m_viIDColor2.push_back(particle.ColorID2());     
-      m_pioOutput->m_vdPx.push_back(particle.Momentum().X());       
-      m_pioOutput->m_vdPy.push_back(particle.Momentum().Y());       
-      m_pioOutput->m_vdPz.push_back(particle.Momentum().Z());       
-      m_pioOutput->m_vdE.push_back(particle.Momentum().T());        
-      if (particle.Flavor()==24 or particle.Flavor()==-24 or particle.Flavor()==25 or particle.Flavor()==23){
+      m_pioOutput->m_viPDGID.push_back( particle.Flavor());
+      m_pioOutput->m_viStatus.push_back( particle.Status());
+      m_pioOutput->m_viIDMother1.push_back( particle.MotherID1());
+      m_pioOutput->m_viIDMother2.push_back( particle.MotherID2());
+      m_pioOutput->m_viIDColor1.push_back(particle.ColorID1());
+      m_pioOutput->m_viIDColor2.push_back(particle.ColorID2());
+      m_pioOutput->m_vdPx.push_back(particle.Momentum().X());
+      m_pioOutput->m_vdPy.push_back(particle.Momentum().Y());
+      m_pioOutput->m_vdPz.push_back(particle.Momentum().Z());
+      m_pioOutput->m_vdE.push_back(particle.Momentum().T());
       m_pioOutput->m_vdGeneratedMass.push_back(particle.GeneratedMass());
-      }
-      else {m_pioOutput->m_vdGeneratedMass.push_back(0);}
-      m_pioOutput->m_vdLifetime.push_back(0);                        
-      m_pioOutput->m_vdHelicity.push_back(particle.Helicity());     
+      m_pioOutput->m_vdLifetime.push_back(0);
+      m_pioOutput->m_vdHelicity.push_back(particle.Helicity());
     }
 
-    m_pioOutput->WriteEventBlock();
+    m_pioOutput->WriteEventBlock(evInput->ReturnMgwt()); //@patmasid
     // garbage collection
     delete evInput;
     evInput = 0;
@@ -101,9 +79,9 @@ namespace WZdecay
   void CLHEFWriter::WriteCrossSection() {
     logger::CLogger log("LHEFWriter::WriteCrossSection");
     log.toLog("Not implemented yet",3);
-    //std::string output{"Crosssection: "};
-    //output.push_back(std::to_string(m_dCrossSection)).push_back("fb. ");
-    //m_pioOutput->write_comment(output);
+    // std::string output{"Crosssection: "};
+    // output.push_back(std::to_string(m_dCrossSection)).push_back("fb. ");
+    // m_pioOutput->write_comment(output);
   }
 
   /**
