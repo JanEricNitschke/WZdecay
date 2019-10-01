@@ -23,7 +23,7 @@ namespace WZdecay
       }
       m_dCrossSectionError = m_pioInput->CrosssectionError();
       m_dCrossSectionMax = m_pioInput->CrosssectionMax();
-      m_lheHeader_lhefreader = m_pioInput->GetLhefHeader(); //@patmasid
+      m_lheHeader_lhefreader = m_pioInput->GetLhefHeader(); //@patmasid 
     }
 
 
@@ -80,16 +80,15 @@ namespace WZdecay
 
       // different status id conventions
       double status = m_pioInput->Status()[iter];
-      if (status == -1) {
-	//        particle->SetStatus(4); //Original
-	particle->SetStatus(-1); //@patmasid
-       }
-      else if (status == 4) {
-        particle->SetStatus(-1);
-      } 
-      else {
-        particle->SetStatus(status);
-      }
+      //if (status == -1) {
+      //  particle->SetStatus(-1);//4
+      //}
+      //else if (status == 4) {
+      //  particle->SetStatus(-1);
+      //} 
+      //else {
+      particle->SetStatus(status);
+	//}
 
       particle->SetHelicity() = m_pioInput->Helicity()[iter];
       particle->SetMomentum() = CLorentzVector(
@@ -105,8 +104,7 @@ namespace WZdecay
     this->AddToSumOfWeights(m_pioInput->Weight());
 
     // Add xmlNodes :
-
-    evInput->SetMgwt(m_pioInput->GetEvtMgwt()); //@patmasid
+    evInput->SetMgwt(m_pioInput->GetEvtMgwt()); //@patmasid 
 
     return 1;
   }

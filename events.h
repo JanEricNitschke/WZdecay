@@ -12,7 +12,6 @@
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 
-
 namespace WZdecay
 {
   /**
@@ -74,11 +73,7 @@ namespace WZdecay
 
     // CMatrixElement* pm_MatrixElement;
 
-    /**
-      Event Weights
-     */
-
-    xmlNode* m_EvtMgwt; //@patmasid
+    xmlNode* m_EvtMgwt; //@patmasid 
 
   public:
     // constructors and destructors

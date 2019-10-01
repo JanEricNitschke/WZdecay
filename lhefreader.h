@@ -18,6 +18,7 @@ namespace WZdecay
   class LHEFReader : public ReaderBase
   {
   private:
+    LHEF::LHEFParser* m_pioInput;
     double m_dSumOfWeights;
     double m_dCrossSection;
     double m_dCrossSectionError;
@@ -25,21 +26,19 @@ namespace WZdecay
     int m_iEventID;
     int m_IndexCurrentFile;
     std::vector<const char*> m_Filenames;
-    xmlNode* m_lheHeader_lhefreader; //@patmasid
+    xmlNode* m_lheHeader_lhefreader; //@patmasid 
 
   public:
     /**
      * @brief constructor
      * @param filename name of input file
      */
-    LHEF::LHEFParser* m_pioInput;
-    
     LHEFReader(const char* filename):
       m_dSumOfWeights(0),
       m_iEventID(0),
       m_IndexCurrentFile(0)
       {
-	m_pioInput = new LHEF::LHEFParser(filename);
+        m_pioInput = new LHEF::LHEFParser(filename);
         m_dCrossSection = m_pioInput->Crosssection();
         m_dCrossSectionError = m_pioInput->CrosssectionError();
         m_dCrossSectionMax = m_pioInput->CrosssectionMax();
@@ -57,7 +56,7 @@ namespace WZdecay
        m_iEventID(0),
        m_IndexCurrentFile(0)
        {
-	 m_pioInput = new LHEF::LHEFParser(filename);
+         m_pioInput = new LHEF::LHEFParser(filename);
          m_Filenames = std::vector<const char*> {filename};
          m_dCrossSectionError = m_pioInput->CrosssectionError();
          m_dCrossSectionMax = m_pioInput->CrosssectionMax();
@@ -110,7 +109,6 @@ namespace WZdecay
     {
       m_lheHeader_lhefreader = lheHeaderIn;
     }
-
 
   }; // end of class LHEFReader
 

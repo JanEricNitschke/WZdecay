@@ -7,11 +7,9 @@
 #include "events.h"
 #include "particle.h"
 #include "LHEF.h"
-#include "lhefreader.h"
 #include "writerbase.h"
 #include "logger.h"
 #include "readerbase.h"
-#include <cmath>
 
 namespace WZdecay
 {
@@ -23,25 +21,25 @@ namespace WZdecay
   private:
     LHEF::LHEFWriter* m_pioOutput;
     ReaderBase* m_pioInput;
-    xmlNode* m_lheHeader_Write; //@patmasid
+    xmlNode* m_lheHeader_Write; //@patmasid 
 
   public:
     /**
      * @brief constructor
      * @param filename name of output file
      */
-  CLHEFWriter(const char* filename, ReaderBase* reader):
+    CLHEFWriter(const char* filename, ReaderBase* reader):
       m_pioInput(reader)
       {
-        m_pioOutput = new LHEF::LHEFWriter(filename, reader->Return_lheHeader(), "WZdecay"); //@patmasid
+	m_pioOutput = new LHEF::LHEFWriter(filename, reader->Return_lheHeader(), "WZdecay"); //@patmasid 
         m_dSumOfWeights = 0;
-	m_lheHeader_Write = reader->Return_lheHeader(); //@patmasid
+	m_lheHeader_Write = reader->Return_lheHeader(); //@patmasid 
       }
       xmlNode* Return_lheHeader_write() //@patmasid
       {
-	return m_lheHeader_Write;
+        return m_lheHeader_Write;
       }
-
+      
     ~CLHEFWriter()
       {
         delete m_pioOutput;
@@ -51,7 +49,7 @@ namespace WZdecay
      * @brief writes CEvent to LHEF container
      * @param event CEvent to be written
      */
-    virtual void WriteEvent(CEvent*& evInput);
+    virtual void WriteEvent(CEvent*& evInput, int Init);
 
     virtual void WriteCrossSection();
 

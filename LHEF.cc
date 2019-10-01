@@ -4,39 +4,75 @@
 
 #include <libxml/parser.h>
 #include <libxml/tree.h>
-#include <libxml/xmlstring.h>
 #include <iostream>
 #include <string>
 #include <vector>
 #include <sstream>
 #include "LHEF.h"
-#include <cmath>
-#include "lhefreader.h"
 
 namespace LHEF {
 
-    void LHEFParser::print_xmlNodes_r(xmlNode * a_node) //@patmasid
+    void LHEFParser::CreateNodeAttrNamePairs_r(){ // @patmasid
+
+      std::vector<const char*> vec_weightgroup{"name","combine"};//, vec_weight, vec_pdfrwt, vec_wgt;
+      std::vector<const char*> vec_weight{"id","MUR","MUF","DYN_SCALE","PDF"};
+      std::vector<const char*> vec_pdfrwt{"beam"};
+      std::vector<const char*> vec_wgt{"id"};
+      
+      std::pair <const char*, std::vector<const char*> > pair_weightgroup = std::make_pair("weightgroup",vec_weightgroup);
+      std::pair <const char*, std::vector<const char*> > pair_weight = std::make_pair("weight",vec_weight);
+      std::pair <const char*, std::vector<const char*> > pair_pdfrwt = std::make_pair("pdfrwt",vec_pdfrwt);
+      std::pair <const char*, std::vector<const char*> > pair_wgt = std::make_pair("wgt",vec_wgt);
+      
+      m_vNodeAttrNamePairs.push_back(pair_weightgroup);
+      m_vNodeAttrNamePairs.push_back(pair_weight);
+      m_vNodeAttrNamePairs.push_back(pair_pdfrwt);
+      m_vNodeAttrNamePairs.push_back(pair_wgt);
+    }
+  
+    void LHEFParser::print_xmlNodes_r(xmlNode * a_node) // @patmasid 
     {
+
       xmlNode *cur_node = NULL;
 
       for (cur_node = a_node; cur_node; cur_node = cur_node->next) {
-	if (cur_node->type == XML_ELEMENT_NODE) {
-	  std::cout<<"<"<<cur_node->name<<"> ";
+        if (cur_node->type == XML_ELEMENT_NODE) {
+
+          bool nodeFoundInPairs = false;
+          //std::cout<<m_vNodeAttrNamePairs.size()<<std::endl;                                                                                                                                            
+          for(uint iPair=0; iPair<m_vNodeAttrNamePairs.size(); iPair++){
+            //std::cout<<(const xmlChar *)m_vNodeAttrNamePairs.at(iPair).first<<std::endl;                                                                                                                
+            if ((!xmlStrcmp(cur_node->name, (const xmlChar *)m_vNodeAttrNamePairs.at(iPair).first))) {
+              nodeFoundInPairs= true;
+	      std::cout<<"<"<<cur_node->name<<" ";
+              for(uint iAttr=0; iAttr<m_vNodeAttrNamePairs.at(iPair).second.size(); iAttr++){
+                if( (xmlHasProp(cur_node,(const xmlChar *)m_vNodeAttrNamePairs.at(iPair).second.at(iAttr))) == NULL) continue;
+                xmlChar *Attr = xmlGetProp(cur_node, (const xmlChar *)m_vNodeAttrNamePairs.at(iPair).second.at(iAttr));
+		std::cout<<m_vNodeAttrNamePairs.at(iPair).second.at(iAttr)<<'='<<'"'<<Attr<<'"'<<' ';
+              }
+	      std::cout<<"> ";
+              break;
+            }
+            else continue;
+          }
+
+          if(nodeFoundInPairs==false) std::cout<<"<"<<cur_node->name<<"> ";
+
 	  std::cout<<cur_node->children->content;
-	  
-	  if(xmlStrcmp(cur_node->name,(const xmlChar *)"MG5ProcCard")==0 || xmlStrcmp(cur_node->name,(const xmlChar *)"MGRunCard")==0){
-	    if(cur_node->children->next != NULL){
+
+          if(xmlStrcmp(cur_node->name,(const xmlChar *)"MG5ProcCard")==0 || xmlStrcmp(cur_node->name,(const xmlChar *)"MGRunCard")==0){
+            if(cur_node->children->next != NULL){
 	      std::cout<<cur_node->children->next->content;
-	    }
-	  }
-	  
-	  print_xmlNodes_r(cur_node->children);
-	  
+            }
+          }
+
+          print_xmlNodes_r(cur_node->children);
+
 	  std::cout<<"</"<<cur_node->name<<">"<<std::endl;
-	}
+        }
       }
     }
-
+  
     void LHEFParser::init() {
       xmlDoc* doc = 0;
       doc = xmlParseFile(m_cFile);
@@ -48,14 +84,12 @@ namespace LHEF {
 
       // way to cast from unsigned char* to std::string ist unsafe, but only known possibility
       std::string lheInitBlock(reinterpret_cast<char*>(m_lheInit->children->content));
-      
+
       // erase first linebreak, content starts afterwards
       ParseInitBlock(lheInitBlock.erase(0,1));
 
-      //Test for printing header and current event nodes //@patmasid
-      //print_xmlNodes_r(m_lheHeader); //@patmasid
-      //print_xmlNodes_r(m_lheCurrentEvent); //@patmasid
-
+      //Test for printing header // @patmasid 
+      //print_xmlNodes(m_lheHeader->children); 
       
     }
 
@@ -64,10 +98,7 @@ namespace LHEF {
         return 0;
       }
 
-      m_lheCurrentEventMgwt = (m_lheCurrentEvent->children->next); //@patmasid
-      
-      //Test for printing Event mgwt block //@patmasid
-      //print_xmlNodes_r(m_lheCurrentEventMgwt); //@patmasid
+      m_lheCurrentEventMgwt = (m_lheCurrentEvent->children->next); // @patmasid 
 
       // way to cast from unsigned char* to std::string ist unsafe, but only known possibility
       std::string lheEventBlock(reinterpret_cast<char*>(m_lheCurrentEvent->children->content));
@@ -91,10 +122,9 @@ namespace LHEF {
             vdLine0.push_back(std::stod(sub));
           }
       }
-
+  
       if (vdLine0[vdLine0.size() - 1] != 1) {
-	std::cout<<vdLine0[vdLine0.size() - 1]<<std::endl;
-        throw std::runtime_error("NPRUP != 1 not implemented yet"); // cause I don't know what exactly this means (and it doesn't happen in my usecase)
+        throw std::runtime_error("NPRUP != 1 not implemented yet"); // Different processes should each get their own lhef/hepmc file.
       }
 
       std::string Line1; 
@@ -185,37 +215,72 @@ namespace LHEF {
       }
     } // end of method ParseEventBlock
 
-    void LHEFWriter::print_xmlNodes_w(xmlNode * a_node) //@patmasid
+    void LHEFWriter::CreateNodeAttrNamePairs_w(){ // @patmasid 
+      
+      std::vector<const char*> vec_weightgroup{"name","combine"};//, vec_weight, vec_pdfrwt, vec_wgt;                                                                                                        
+      std::vector<const char*> vec_weight{"id","MUR","MUF","DYN_SCALE","PDF"};
+      std::vector<const char*> vec_pdfrwt{"beam"};
+      std::vector<const char*> vec_wgt{"id"};
+      
+      std::pair <const char*, std::vector<const char*> > pair_weightgroup = std::make_pair("weightgroup",vec_weightgroup);
+      std::pair <const char*, std::vector<const char*> > pair_weight = std::make_pair("weight",vec_weight);
+      std::pair <const char*, std::vector<const char*> > pair_pdfrwt = std::make_pair("pdfrwt",vec_pdfrwt);
+      std::pair <const char*, std::vector<const char*> > pair_wgt = std::make_pair("wgt",vec_wgt);
+      
+      m_vNodeAttrNamePairs.push_back(pair_weightgroup);
+      m_vNodeAttrNamePairs.push_back(pair_weight);
+      m_vNodeAttrNamePairs.push_back(pair_pdfrwt);
+      m_vNodeAttrNamePairs.push_back(pair_wgt);
+    }
+  
+    void LHEFWriter::print_xmlNodes_w(xmlNode * a_node) // @patmasid 
     {
       xmlNode *cur_node = NULL;
-      
+
       for (cur_node = a_node; cur_node; cur_node = cur_node->next) {
-	if (cur_node->type == XML_ELEMENT_NODE) {
-	  m_strOutput<<"<"<<cur_node->name<<">";
-	  m_strOutput<<cur_node->children->content;
-	  
-	  if(xmlStrcmp(cur_node->name,(const xmlChar *)"MG5ProcCard")==0 || xmlStrcmp(cur_node->name,(const xmlChar *)"MGRunCard")==0){
-	    if(cur_node->children->next != NULL){
-	      m_strOutput<<cur_node->children->next->content;
-	    }
-	  }
-	  
-	  print_xmlNodes_w(cur_node->children);
-	  
-	  m_strOutput<<"</"<<cur_node->name<<">"<<std::endl;
-	}
+        if (cur_node->type == XML_ELEMENT_NODE) {
+
+          bool nodeFoundInPairs = false;
+          //std::cout<<m_vNodeAttrNamePairs.size()<<std::endl;                                                                                                                                            
+          for(uint iPair=0; iPair<m_vNodeAttrNamePairs.size(); iPair++){
+            //std::cout<<(const xmlChar *)m_vNodeAttrNamePairs.at(iPair).first<<std::endl;                                                                                                                
+            if ((!xmlStrcmp(cur_node->name, (const xmlChar *)m_vNodeAttrNamePairs.at(iPair).first))) {
+              nodeFoundInPairs= true;
+              m_strOutput<<"<"<<cur_node->name<<" ";
+              for(uint iAttr=0; iAttr<m_vNodeAttrNamePairs.at(iPair).second.size(); iAttr++){
+                if( (xmlHasProp(cur_node,(const xmlChar *)m_vNodeAttrNamePairs.at(iPair).second.at(iAttr))) == NULL) continue;
+                xmlChar *Attr = xmlGetProp(cur_node, (const xmlChar *)m_vNodeAttrNamePairs.at(iPair).second.at(iAttr));
+                m_strOutput<<m_vNodeAttrNamePairs.at(iPair).second.at(iAttr)<<'='<<'"'<<Attr<<'"'<<' ';
+              }
+              m_strOutput<<"> ";
+              break;
+            }
+            else continue;
+          }
+
+          if(nodeFoundInPairs==false) m_strOutput<<"<"<<cur_node->name<<">";
+          m_strOutput<<cur_node->children->content;
+
+          if(xmlStrcmp(cur_node->name,(const xmlChar *)"MG5ProcCard")==0 || xmlStrcmp(cur_node->name,(const xmlChar *)"MGRunCard")==0){
+            if(cur_node->children->next != NULL){
+              m_strOutput<<cur_node->children->next->content;
+            }
+          }
+
+          print_xmlNodes_w(cur_node->children);
+
+          m_strOutput<<"</"<<cur_node->name<<">"<<std::endl;
+        }
       }
     }
 
-    void LHEFWriter::WriteHeader(xmlNode* header, const char* generator) {
+    void LHEFWriter::WriteHeader(xmlNode* header, const char* generator) { // @patmasid 
         m_strOutput << "<LesHouchesEvents version=\"1.0\">" << std::endl;
         m_strOutput << "<header>" << std::endl;
         if (generator != 0) {
-	  m_strOutput << "  <generator_name>" << generator << "</generator_name>" << std::endl;
-	}
-
-	print_xmlNodes_w(header->children); //@patmasid
-
+          m_strOutput << "  <generator_name>" << generator << "</generator_name>" << std::endl;
+        }
+	print_xmlNodes_w(header->children); // @patmasid 
         m_strOutput << "</header>" << std::endl;
     }
 
@@ -284,40 +349,34 @@ namespace LHEF {
       m_strOutput << "</init>" << std::endl;
     }
 
-    void LHEFWriter::WriteEventBlock(xmlNode* EventMgwt) {
+    void LHEFWriter::WriteEventBlock(xmlNode* EventMgwt) { // @patmasid 
       m_strOutput << "<event>" << std::endl;
-      m_strOutput << " "  << m_iNParticles<<std::scientific;
-      m_strOutput << " " << m_iIDProcess<<std::scientific;
-      m_strOutput << " " << m_dWeight<<std::scientific;
-      m_strOutput << " " << m_dEventscale<<std::scientific;
-      m_strOutput << " " << m_dQEDCoupling<<std::scientific;
-      m_strOutput << " " << m_dQCDCoupling<<std::scientific;
+      m_strOutput << " "  << m_iNParticles;
+      m_strOutput << "\t" << m_iIDProcess;
+      m_strOutput << "\t" << m_dWeight;
+      m_strOutput << "\t" << m_dEventscale;
+      m_strOutput << "\t" << m_dQEDCoupling;
+      m_strOutput << "\t" << m_dQCDCoupling;
       m_strOutput << std::endl;
       for (int i = 0; i < m_iNParticles; i++) {
-	m_strOutput << "   " << m_viPDGID[i];
-      m_strOutput << " "  << m_viStatus[i];
-      m_strOutput << " "  << m_viIDMother1[i];
-      m_strOutput << " "  << m_viIDMother2[i];
-      m_strOutput << " "  << m_viIDColor1[i];
-      m_strOutput << " "  << m_viIDColor2[i];
-      m_strOutput << " "  << m_vdPx[i]<<std::scientific;
-      m_strOutput << " "  << m_vdPy[i]<<std::scientific;
-      m_strOutput << " "  << m_vdPz[i]<<std::scientific;
-      m_strOutput << " "  << m_vdE[i]<<std::scientific;
-      if(pow(m_vdE[i],2)-(pow(m_vdPx[i],2)+pow(m_vdPy[i],2)+pow(m_vdPz[i],2))>0)                                             //@patmasid
-	m_strOutput << " "  << sqrt(pow(m_vdE[i],2)-(pow(m_vdPx[i],2)+pow(m_vdPy[i],2)+pow(m_vdPz[i],2)))<<std::scientific;  //@patmasid
-      else                                                                                                                   //@patmasid
-	m_strOutput << " "  << 0<<std::scientific;                                                                           //@patmasid
-      m_strOutput << " "  << m_vdLifetime[i]<<std::scientific;
-      m_strOutput << " "  << m_vdHelicity[i]<<std::scientific;
+      m_strOutput << "   " << m_viPDGID[i];
+      m_strOutput << "\t"  << m_viStatus[i];
+      m_strOutput << "\t"  << m_viIDMother1[i];
+      m_strOutput << "\t"  << m_viIDMother2[i];
+      m_strOutput << "\t"  << m_viIDColor1[i];
+      m_strOutput << "\t"  << m_viIDColor2[i];
+      m_strOutput << "\t"  << m_vdPx[i];
+      m_strOutput << "\t"  << m_vdPy[i];
+      m_strOutput << "\t"  << m_vdPz[i];
+      m_strOutput << "\t"  << m_vdE[i];
+      m_strOutput << "\t"  << m_vdGeneratedMass[i];
+      m_strOutput << "\t"  << m_vdLifetime[i];
+      m_strOutput << "\t"  << m_vdHelicity[i];
       m_strOutput << std::endl;
       }
-    
-      print_xmlNodes_w(EventMgwt);
-
+      print_xmlNodes_w(EventMgwt); 
       m_strOutput << "</event>" << std::endl;
       SetDefaultEvent();
     }
-    
 
 } // end of namespace LHEF

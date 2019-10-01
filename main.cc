@@ -154,8 +154,8 @@ int main (int argc, char **argv)
   while (iCounter < iMaxNumberEvents && reader->ReadEvent(pEvent)) {
     iCounter ++;
     log.toLog("In new event.", 1);
-    decWtoENu.DecayAllPDGID(pEvent, random);
-    decZtoENu.DecayAllPDGID(pEvent, random);
+    decWtoENu.DecayAllPDGID(pEvent, random,0);
+    decZtoENu.DecayAllPDGID(pEvent, random,0);
     if (iCounter % 100 == 0) {
         PrintProgressbar(iCounter, fmin(2000000., iMaxNumberEvents), 60);
     }

@@ -19,7 +19,7 @@ namespace WZdecay
   private:
     double m_dSumOfWeights;
     double m_dCrossSection;
-    xmlNode* m_lheHeader_readerbase; //@patmasid
+    xmlNode* m_lheHeader_readerbase; //@patmasid 
 
   public:
     virtual bool ReadEvent(CEvent*& evInput) = 0;
@@ -35,11 +35,11 @@ namespace WZdecay
       return m_lheHeader_readerbase;
     }
 
-    virtual void Set_lheHeader(xmlNode* lheHeaderIn) //@patmasid
+    virtual void Set_lheHeader(xmlNode* lheHeaderIn) //@patmasid                                                                                                                                           
     {
       m_lheHeader_readerbase = lheHeaderIn;
     }
-
+    
   }; // end of class ReaderBase
 
 }; // end of namespace WZdecay

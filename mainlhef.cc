@@ -63,7 +63,7 @@ void EndProgramm() {
   logger::CLogger* log = new logger::CLogger("EndProgramm()");
   log->toLog("Wrong number of arguments",4);
   std::cerr << "Usage: ./WZdecay [-l LOGLEVEL -c CROSSSECTION -s RNGSEED -f Frame] INPUTFILE1 [INPUTFILE2 [...]]" << std::endl;
-  std::cerr << "Frame 0 = Labframe, 1 Parton com Planned:(, 2 WZ com)" << std::endl;
+  std::cerr << "Frame 0 = Labframe, 1 Parton com, 2 WZ com" << std::endl;
   std::cerr << "Where the INPUTFILES are either .lhe(f) or .hepmc files. Currently all have to be of the same type and connection of multiple files is only implemented for hepmc-files (Other files are ignored for lhef-files)." << std::endl;
   // log->DumpToFile("WZdecay.log");
   delete log;
