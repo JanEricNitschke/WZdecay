@@ -26,7 +26,7 @@ namespace WZdecay
     int m_iEventID;
     int m_IndexCurrentFile;
     std::vector<const char*> m_Filenames;
-
+    xmlNode* m_lheHeader_lhefreader; //@patmasid 
 
   public:
     /**
@@ -98,6 +98,16 @@ namespace WZdecay
 
     void AddToSumOfWeights(double dWeight) {
       m_dSumOfWeights += dWeight;
+    }
+
+    xmlNode* Return_lheHeader() //@patmasid
+    {
+      return m_lheHeader_lhefreader;
+    }
+
+    void Set_lheHeader(xmlNode* lheHeaderIn) //@patmasid
+    {
+      m_lheHeader_lhefreader = lheHeaderIn;
     }
 
   }; // end of class LHEFReader

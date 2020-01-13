@@ -8,6 +8,7 @@
 #include "LHEF.h"
 #include "lhefwriter.h"
 #include "logger.h"
+#include <cmath>
 
 namespace WZdecay
 {
@@ -89,7 +90,7 @@ namespace WZdecay
       m_pioOutput->m_vdHelicity.push_back(particle.Helicity());     
     }
 
-    m_pioOutput->WriteEventBlock();
+    m_pioOutput->WriteEventBlock(evInput->ReturnMgwt()); //@patmasid
     // garbage collection
     delete evInput;
     evInput = 0;

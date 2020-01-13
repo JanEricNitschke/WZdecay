@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <cmath>
 
 namespace LHEF {
 
@@ -23,6 +24,7 @@ namespace LHEF {
     xmlNode* m_lheFile;
     xmlNode* m_lheHeader;
     xmlNode* m_lheCurrentEvent;
+    xmlNode* m_lheCurrentEventMgwt; //@patmasid
   public:
     int m_iIDBeam1;
     int m_iIDBeam2;
@@ -54,6 +56,8 @@ namespace LHEF {
     std::vector<double> m_vdPz;
     std::vector<double> m_vdE;
     std::vector<double> m_vdGeneratedMass;
+
+    std::vector< std::pair <const char*, std::vector<const char*> > > m_vNodeAttrNamePairs; //@patmasid
 
   public:
     LHEFParser(const char* filename, double xsection = 0):
@@ -144,6 +148,15 @@ namespace LHEF {
       return m_vdGeneratedMass;
     }
 
+    xmlNode* GetEvtMgwt() //@patmasid 
+    {
+      return m_lheCurrentEventMgwt;
+    }
+
+    xmlNode* GetLhefHeader() //@patmasid
+    {
+      return m_lheHeader;
+    }
 
     void init();
 
@@ -152,6 +165,10 @@ namespace LHEF {
     void ParseInitBlock(std::string InitBlock);
 
     void ParseEventBlock(std::string EventBlock);
+
+    void print_xmlNodes_r(xmlNode * a_node); //@patmasid 
+
+    void CreateNodeAttrNamePairs_r(); //@patmasid
 
   }; // end of class LHEFParser
 
@@ -198,10 +215,13 @@ namespace LHEF {
     std::vector<double>m_vdLifetime;
     std::vector<double>m_vdHelicity;
 
-    LHEFWriter(const char* filename, const char* generator = 0)
+    std::vector< std::pair <const char*, std::vector<const char*> > > m_vNodeAttrNamePairs; //@patmasid 
+
+    LHEFWriter(const char* filename, xmlNode* header, const char* generator = 0) //@patmasid
       {
         m_strOutput.open(filename);
-        WriteHeader(generator);
+	CreateNodeAttrNamePairs_w();
+        WriteHeader(header, generator); //@patmasid
         SetDefaultInit();
         SetDefaultEvent();
       }
@@ -215,7 +235,11 @@ namespace LHEF {
     void SetDefaultInit();
     void SetDefaultEvent();
     void WriteInitBlock();
-    void WriteEventBlock();
+    void print_xmlNodes_w(xmlNode * a_node); //@patmasid 
+    void WriteHeader(xmlNode* header, const char* generator = 0); //@patmasid
+    void WriteEventBlock(xmlNode* EventMgwt); //@patmasid
+    
+    void CreateNodeAttrNamePairs_w(); //@patmasid
 
   }; // end of class LHEFWriter
 } // end of namespace LHEF

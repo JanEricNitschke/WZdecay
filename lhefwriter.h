@@ -21,7 +21,7 @@ namespace WZdecay
   private:
     LHEF::LHEFWriter* m_pioOutput;
     ReaderBase* m_pioInput;
-
+    xmlNode* m_lheHeader_Write; //@patmasid 
 
   public:
     /**
@@ -31,10 +31,15 @@ namespace WZdecay
     CLHEFWriter(const char* filename, ReaderBase* reader):
       m_pioInput(reader)
       {
-        m_pioOutput = new LHEF::LHEFWriter(filename, "WZdecay");
+	m_pioOutput = new LHEF::LHEFWriter(filename, reader->Return_lheHeader(), "WZdecay"); //@patmasid 
         m_dSumOfWeights = 0;
+	m_lheHeader_Write = reader->Return_lheHeader(); //@patmasid 
       }
-
+      xmlNode* Return_lheHeader_write() //@patmasid
+      {
+        return m_lheHeader_Write;
+      }
+      
     ~CLHEFWriter()
       {
         delete m_pioOutput;

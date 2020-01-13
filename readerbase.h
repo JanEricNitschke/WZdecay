@@ -19,6 +19,7 @@ namespace WZdecay
   private:
     double m_dSumOfWeights;
     double m_dCrossSection;
+    xmlNode* m_lheHeader_readerbase; //@patmasid 
 
   public:
     virtual bool ReadEvent(CEvent*& evInput) = 0;
@@ -28,6 +29,17 @@ namespace WZdecay
     virtual const double CrossSectionMax() const = 0;
     virtual void SetCrossSection(double xsection) = 0;
     virtual void AddToSumOfWeights(double dWeight) = 0;
+    
+    virtual xmlNode* Return_lheHeader() //@patmasid
+    {
+      return m_lheHeader_readerbase;
+    }
+
+    virtual void Set_lheHeader(xmlNode* lheHeaderIn) //@patmasid                                                                                                                                           
+    {
+      m_lheHeader_readerbase = lheHeaderIn;
+    }
+    
   }; // end of class ReaderBase
 
 }; // end of namespace WZdecay

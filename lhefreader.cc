@@ -23,6 +23,7 @@ namespace WZdecay
       }
       m_dCrossSectionError = m_pioInput->CrosssectionError();
       m_dCrossSectionMax = m_pioInput->CrosssectionMax();
+      m_lheHeader_lhefreader = m_pioInput->GetLhefHeader(); //@patmasid 
     }
 
 
@@ -101,6 +102,9 @@ namespace WZdecay
     // Read in weight of event
     evInput->SetWeight(m_pioInput->Weight());
     this->AddToSumOfWeights(m_pioInput->Weight());
+
+    // Add xmlNodes :
+    evInput->SetMgwt(m_pioInput->GetEvtMgwt()); //@patmasid 
 
     return 1;
   }
